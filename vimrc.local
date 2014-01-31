@@ -1,33 +1,97 @@
-set nocursorline " don't highlight current line
+"set nocursorline " don't highlight current line
 
 " keyboard shortcuts
-inoremap jj <ESC>
+noremap! jj <ESC>
 
-" highlight search
-"set hlsearch
-"nmap <leader>hl :let @/ = ""<CR>
+"disable system clipboard
+set clipboard="*
+
+set colorcolumn=80
+
+set gdefault
+nmap <leader>c<space> :NERDComToggleComment
+nmap <leader>c<space> V,c<space>0
+nmap <leader>op :CtrlP<CR>
+nmap <leader>oo :CtrlPBuffer<CR>
+" grep in folder
+nmap <leader>og :Ack!<space>
+nmap <space> :w<CR>
+" vertical split
+nnoremap <leader>w <C-w>v<C-w>l
+
+" strip whitespaces
+nmap <leader>ss :call whitespace#strip_trailing()<CR>
+
+" remove search highlights
+nnoremap <leader><space> :noh<cr>"
+
+" no backup file
+set nobackup
+set noswapfile
+
+" better Ack support
+if executable('ag')
+  let g:ackprg = 'ag --ignore-dir public --ignore-dir bower_components --ignore-dir node_modules --nogroup --column'
+endif
+
+" enable undo
+set undodir=~/.vim/undodir
+set undofile
+set undolevels=1000 "maximum number of changes that can be undone
+set undoreload=10000 "maximum number lines to save for undo on a buffer reload
+
+let g:ctrlp_custom_ignore = 'public'
+
+" highlight search results
+set hlsearch
+
+" Duplicate one line
+:nmap <Leader>a :co .-1<Enter>
+:imap <Leader>a <Esc>:co .<Enter>gi
+:vmap <Leader>a :co '><Enter>gv
+
+" let g:airline_powerline_fonts = 1
+" :set guifont=Monaco:h12
+" :set guifont=Consolas:h13
+:set guifont=Inconsolata\ for\ Powerline:h14
+:set guioptions-=T
+:set guioptions+=LlRrb
+:set guioptions-=LlRrb
+let g:airline_powerline_fonts=1
+" :set background=dark
+
+" tab autocompletion
+function! Smart_TabComplete()
+  let line = getline('.')                         " current line
+
+  let substr = strpart(line, -1, col('.')+1)      " from the start of the current
+                                                  " line to one character right
+                                                  " of the cursor
+  let substr = matchstr(substr, "[^ \t]*$")       " word till cursor
+  if (strlen(substr)==0)                          " nothing to match on empty string
+    return "\<tab>"
+  endif
+  let has_period = match(substr, '\.') != -1      " position of period, if any
+  let has_slash = match(substr, '\/') != -1       " position of slash, if any
+  if (!has_period && !has_slash)
+    return "\<C-X>\<C-P>"                         " existing text matching
+  elseif ( has_slash )
+    return "\<C-X>\<C-F>"                         " file matching
+  else
+    return "\<C-X>\<C-O>"                         " plugin matching
+  endif
+endfunction
+
+inoremap <tab> <c-r>=Smart_TabComplete()<CR>
 
 " gui settings
 if (&t_Co == 256 || has('gui_running'))
   if ($TERM_PROGRAM == 'iTerm.app')
-    colorscheme solarized
+    " colorscheme solarized
+    " colorscheme distinguished
+    colorscheme railscasts
+    set linespace=4
   else
-    colorscheme desert
+    colorscheme railscasts
   endif
 endif
-
-" Disambiguate ,a & ,t from the Align plugin, making them fast again.
-"
-" This section is here to prevent AlignMaps from adding a bunch of mappings
-" that interfere with the very-common ,a and ,t mappings. This will get run
-" at every startup to remove the AlignMaps for the *next* vim startup.
-"
-" If you do want the AlignMaps mappings, remove this section, remove
-" ~/.vim/bundle/Align, and re-run rake in maximum-awesome.
-function! s:RemoveConflictingAlignMaps()
-  if exists("g:loaded_AlignMapsPlugin")
-    AlignMapsClean
-  endif
-endfunction
-command! -nargs=0 RemoveConflictingAlignMaps call s:RemoveConflictingAlignMaps()
-silent! autocmd VimEnter * RemoveConflictingAlignMaps

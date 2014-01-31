@@ -1,0 +1,5 @@
+Bundle 'scrooloose/nerdcommenter'
+Bundle 'wavded/vim-stylus'
+Bundle 'dhruvasagar/vim-railscasts-theme'
+Bundle 'bling/vim-airline'
+Bundle 'leshill/vim-json'
